@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titre %}Vidéothèque{% endblock %} · Vidéotek</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="entete">
+    <div class="conteneur entete__barre">
+      <a class="logo" href="{{ url_for('catalogue') }}"><span class="logo__marque" aria-hidden="true">▶</span>Vidéotek</a>
+      <nav class="menu" aria-label="Navigation principale">
+        {% if session.utilisateur_id %}
+          <a href="{{ url_for('catalogue') }}" {% if request.endpoint in ('catalogue', 'fiche_film') %}aria-current="page"{% endif %}>Catalogue</a>
+          <a href="{{ url_for('compte') }}" {% if request.endpoint == 'compte' %}aria-current="page"{% endif %}>Mon compte</a>
+          {% if est_admin %}
+            <span class="menu__groupe">Admin</span>
+            <a href="{{ url_for('ajouter_film') }}" {% if request.endpoint == 'ajouter_film' %}aria-current="page"{% endif %}>Ajouter un film</a>
+            <a href="{{ url_for('import_tmdb') }}" {% if request.endpoint == 'import_tmdb' %}aria-current="page"{% endif %}>Import TMDB</a>
+            <a href="{{ url_for('gerer_categories') }}" {% if request.endpoint == 'gerer_categories' %}aria-current="page"{% endif %}>Catégories</a>
+            <a href="{{ url_for('gerer_utilisateurs') }}" {% if request.endpoint == 'gerer_utilisateurs' %}aria-current="page"{% endif %}>Utilisateurs</a>
+          {% endif %}
+          <a class="menu__sortie" href="{{ url_for('deconnexion') }}">Déconnexion <span class="menu__nom">{{ session.nom_utilisateur }}</span></a>
+        {% else %}
+          <a href="{{ url_for('connexion') }}" {% if request.endpoint == 'connexion' %}aria-current="page"{% endif %}>Connexion</a>
+          <a href="{{ url_for('inscription') }}" {% if request.endpoint == 'inscription' %}aria-current="page"{% endif %}>Inscription</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="conteneur principal">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="messages" role="status">
+          {% for categorie, texte in messages %}
+            <p class="message message--{{ categorie }}">{{ texte }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block contenu %}{% endblock %}
+  </main>
+
+  <footer class="pied">
+    <div class="conteneur">RT0705 · Gestion d'une vidéothèque · application web 3 tiers (Flask, API REST, Docker)</div>
+  </footer>
+</body>
+</html>

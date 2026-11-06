@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% from "_macros.html" import affiche, etoiles, note_texte %}
+{% block titre %}{{ film.titre }}{% endblock %}
+{% block contenu %}
+<p class="fil"><a href="{{ url_for('catalogue') }}">← Catalogue</a></p>
+
+<article class="fiche">
+  <div class="fiche__affiche">{{ affiche(film, 'grande') }}</div>
+  <div class="fiche__infos">
+    <h1>{{ film.titre }} <span class="discret">{{ film.annee or '' }}</span></h1>
+    {% if film.genres %}
+      <p class="etiquettes">{% for genre in film.genres %}<span class="etiquette">{{ genre }}</span>{% endfor %}</p>
+    {% endif %}
+    <p class="note-film">
+      {{ etoiles(film.note_moyenne) }}
+      {% if film.nb_avis %}
+        <strong>{{ note_texte(film.note_moyenne) }}</strong> / 5 · {{ film.nb_avis }} avis
+      {% else %}
+        <span class="discret">Pas encore d'avis</span>
+      {% endif %}
+    </p>
+    {% if film.acteurs %}<p><strong>Avec</strong> {{ film.acteurs | join(', ') }}</p>{% endif %}
+    {% if film.description %}<p class="synopsis">{{ film.description }}</p>{% endif %}
+    <p class="discret">Ajouté le {{ film.date_ajout | date_fr }}{% if film.tmdb_id %} · importé depuis TMDB{% endif %}</p>
+
+    <div class="actions">
+      <form method="post" action="{{ url_for('envies', film_id=film.id) }}">
+        {{ champ_csrf() }}
+        <input type="hidden" name="action" value="{{ 'retirer' if dans_envies else 'ajouter' }}">
+        <input type="hidden" name="suivant" value="{{ request.path }}">
+        <button class="bouton bouton--secondaire {{ 'bouton--actif' if dans_envies }}" type="submit">
+          {{ "♥ Dans ma liste d'envies" if dans_envies else "♡ Liste d'envies" }}
+        </button>
+      </form>
+      <form method="post" action="{{ url_for('vus', film_id=film.id) }}">
+        {{ champ_csrf() }}
+        <input type="hidden" name="action" value="{{ 'retirer' if deja_vu else 'ajouter' }}">
+        <input type="hidden" name="suivant" value="{{ request.path }}">
+        <button class="bouton bouton--secondaire {{ 'bouton--actif' if deja_vu }}" type="submit">
+          {{ '✓ Vu' if deja_vu else 'Marquer comme vu' }}
+        </button>
+      </form>
+    </div>
+
+    {% if est_admin %}
+    <div class="actions actions--admin">
+      <span class="actions__titre">Administration</span>
+      <a class="bouton bouton--secondaire" href="{{ url_for('modifier_film', film_id=film.id) }}">Modifier</a>
+      <a class="bouton bouton--secondaire" href="{{ url_for('supports_film', film_id=film.id) }}">Supports</a>
+      <form method="post" action="{{ url_for('supprimer_film', film_id=film.id) }}"
+            onsubmit="return confirm('Supprimer ce film, ses supports et ses avis ?');">
+        {{ champ_csrf() }}
+        <button class="bouton bouton--danger" type="submit">Supprimer</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</article>
+
+<section class="bloc">
+  <h2>Supports</h2>
+  {% if film.supports %}
+  <table class="tableau">
+    <thead><tr><th>Type</th><th>Format</th><th>Disponibilité</th><th></th></tr></thead>
+    <tbody>
+      {% for support in film.supports %}
+      <tr>
+        <td>{{ support.type | capitalize }}</td>
+        <td>{{ support.format }}</td>
+        <td>
+          {% if support.type == 'numérique' %}<span class="badge badge--info">En ligne</span>
+          {% elif support.disponible %}<span class="badge badge--succes">Disponible</span>
+          {% else %}<span class="badge badge--erreur">Indisponible</span>{% endif %}
+        </td>
+        <td class="droite">
+          {% if support.type == 'numérique' %}
+            {% if support.lien and support.lien.startswith(('http://', 'https://', '/')) %}
+              <a class="bouton bouton--petit" href="{{ support.lien }}" target="_blank" rel="noopener">Regarder</a>
+            {% endif %}
+          {% elif support.disponible %}
+            <form method="post" action="{{ url_for('emprunter', support_id=support.id) }}">
+              {{ champ_csrf() }}
+              <input type="hidden" name="film_id" value="{{ film.id }}">
+              <button class="bouton bouton--petit" type="submit">Emprunter</button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="aide">Un emprunt dure 14 jours.</p>
+  {% else %}
+  <p class="vide">Aucun support pour ce film.</p>
+  {% endif %}
+</section>
+
+<section class="bloc" id="avis">
+  <h2>Avis</h2>
+  <form class="formulaire formulaire--avis" method="post" action="{{ url_for('donner_avis', film_id=film.id) }}">
+    {{ champ_csrf() }}
+    <label>Votre note
+      <select name="note" required>
+        {% for n in range(5, 0, -1) %}
+          <option value="{{ n }}" {% if mon_avis and mon_avis.note == n %}selected{% endif %}>{{ '★' * n }}{{ '☆' * (5 - n) }} {{ n }}/5</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Commentaire <span class="discret">(facultatif)</span>
+      <textarea name="commentaire" rows="3" maxlength="2000">{{ mon_avis.commentaire if mon_avis and mon_avis.commentaire else '' }}</textarea>
+    </label>
+    <button class="bouton" type="submit">{{ 'Modifier mon avis' if mon_avis else 'Publier mon avis' }}</button>
+  </form>
+
+  {% for avis in film.avis %}
+  <article class="avis">
+    <header>
+      <strong>{{ avis.nom_utilisateur or 'Utilisateur' }}</strong>
+      {{ etoiles(avis.note) }}
+      <span class="discret">{{ avis.date | date_fr }}</span>
+    </header>
+    {% if avis.commentaire %}<p>{{ avis.commentaire }}</p>{% endif %}
+  </article>
+  {% else %}
+  <p class="vide">Soyez le premier à donner votre avis.</p>
+  {% endfor %}
+</section>
+{% endblock %}

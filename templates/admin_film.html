@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block titre %}{{ 'Modifier un film' if film_id else 'Ajouter un film' }}{% endblock %}
+{% block contenu %}
+{% if film_id %}<p class="fil"><a href="{{ url_for('fiche_film', film_id=film_id) }}">← Retour à la fiche</a></p>{% endif %}
+<section class="carte">
+  <h1>{{ 'Modifier « ' ~ film.titre ~ ' »' if film_id else 'Ajouter un film' }}</h1>
+  {% if not film_id %}
+    <p class="discret">Ajout manuel, sans TMDB. Pour récupérer automatiquement les informations d'un film,
+      utilisez plutôt l'<a href="{{ url_for('import_tmdb', titre=film.titre or '') }}">import TMDB</a>.</p>
+  {% endif %}
+  <form class="formulaire" method="post">
+    {{ champ_csrf() }}
+    <div class="formulaire__ligne">
+      <label class="formulaire__large">Titre
+        <input name="titre" value="{{ film.titre or '' }}" maxlength="200" required>
+      </label>
+      <label>Année de sortie
+        <input name="annee" type="number" min="1888" max="2100" value="{{ film.annee or '' }}" required>
+      </label>
+    </div>
+    <fieldset class="cases">
+      <legend>Genres</legend>
+      {% for categorie in categories %}
+        <label class="case">
+          <input type="checkbox" name="categories" value="{{ categorie.id }}"
+                 {% if categorie.id in (film.categories or []) %}checked{% endif %}>
+          {{ categorie.nom }}
+        </label>
+      {% else %}
+        <p class="discret">Aucune catégorie : <a href="{{ url_for('gerer_categories') }}">en créer</a>.</p>
+      {% endfor %}
+    </fieldset>
+    <label>Acteurs <span class="discret">(séparés par des virgules)</span>
+      <input name="acteurs" value="{{ (film.acteurs or []) | join(', ') }}">
+    </label>
+    <label>Description
+      <textarea name="description" rows="4" maxlength="5000">{{ film.description or '' }}</textarea>
+    </label>
+    <label>Affiche <span class="discret">(URL d'une image, facultatif)</span>
+      <input name="affiche" type="url" value="{{ film.affiche or '' }}" placeholder="https://…">
+    </label>
+    <div class="actions">
+      <button class="bouton" type="submit">{{ 'Enregistrer' if film_id else 'Ajouter le film' }}</button>
+      <a class="lien-discret" href="{{ url_for('fiche_film', film_id=film_id) if film_id else url_for('catalogue') }}">Annuler</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

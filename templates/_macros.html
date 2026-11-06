@@ -1,0 +1,26 @@
+{# Petits composants réutilisés par plusieurs templates #}
+
+{% macro affiche(film, taille='') -%}
+  <div class="affiche {{ 'affiche--' ~ taille if taille }}" style="--teinte: {{ (film.id or 0) * 47 % 360 }}">
+    {%- if film.affiche %}
+      <img src="{{ film.affiche }}" alt="Affiche de {{ film.titre }}" loading="lazy">
+    {%- elif taille == 'mini' %}
+      <span class="affiche__initiale" aria-hidden="true">{{ (film.titre or '?')[0] }}</span>
+    {%- else %}
+      <span class="affiche__titre" aria-hidden="true">{{ film.titre }}</span>
+    {%- endif %}
+  </div>
+{%- endmacro %}
+
+{% macro etoiles(note) -%}
+  {%- if note is none -%}
+    <span class="etoiles etoiles--vide" title="Pas encore noté">☆☆☆☆☆</span>
+  {%- else -%}
+    {%- set pleines = note | round | int -%}
+    <span class="etoiles" title="{{ note }} / 5">{{ '★' * pleines }}{{ '☆' * (5 - pleines) }}</span>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro note_texte(note) -%}
+  {{ ('%.1f' | format(note)) | replace('.', ',') }}
+{%- endmacro %}

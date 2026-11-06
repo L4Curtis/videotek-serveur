@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "_macros.html" import affiche %}
+{% block titre %}Import TMDB{% endblock %}
+{% block contenu %}
+<div class="titre-page">
+  <h1>Import depuis TMDB</h1>
+  <p class="discret">Titre, année, genres, acteurs, synopsis et affiche sont récupérés automatiquement.</p>
+</div>
+
+<form class="filtres" method="get" action="{{ url_for('import_tmdb') }}" role="search">
+  <input class="filtres__recherche" type="search" name="titre" value="{{ titre }}"
+         placeholder="Titre du film à importer…" aria-label="Titre recherché sur TMDB" required autofocus>
+  <button class="bouton" type="submit">Rechercher sur TMDB</button>
+</form>
+
+{% if erreur_tmdb %}
+  <div class="message message--erreur">
+    {{ erreur_tmdb }}. Vous pouvez
+    <a href="{{ url_for('ajouter_film', titre=titre) }}">ajouter ce film à la main</a>.
+  </div>
+{% elif resultats is not none %}
+  {% if resultats %}
+  <ul class="grille-films">
+    {% for resultat in resultats %}
+    <li class="carte-film carte-film--import">
+      {{ affiche({'id': resultat.tmdb_id, 'titre': resultat.titre, 'affiche': resultat.affiche}) }}
+      <div class="carte-film__corps">
+        <h2 class="carte-film__titre">{{ resultat.titre }}</h2>
+        <p class="carte-film__meta">{{ resultat.annee or 'Année inconnue' }}</p>
+        {% if resultat.film_id %}
+          <a class="bouton bouton--petit bouton--secondaire" href="{{ url_for('fiche_film', film_id=resultat.film_id) }}">Déjà importé</a>
+        {% else %}
+          <form method="post">
+            {{ champ_csrf() }}
+            <input type="hidden" name="tmdb_id" value="{{ resultat.tmdb_id }}">
+            <input type="hidden" name="titre" value="{{ titre }}">
+            <button class="bouton bouton--petit" type="submit">Importer</button>
+          </form>
+        {% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="discret">Le film n'est pas dans la liste ? <a href="{{ url_for('ajouter_film', titre=titre) }}">L'ajouter à la main</a>.</p>
+  {% else %}
+  <p class="vide">TMDB ne trouve aucun film pour « {{ titre }} ».
+    <a href="{{ url_for('ajouter_film', titre=titre) }}">Ajouter ce film à la main</a>.</p>
+  {% endif %}
+{% endif %}
+{% endblock %}

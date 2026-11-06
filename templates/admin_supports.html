@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block titre %}Supports · {{ film.titre }}{% endblock %}
+{% block contenu %}
+<p class="fil"><a href="{{ url_for('fiche_film', film_id=film.id) }}">← {{ film.titre }}</a></p>
+<div class="titre-page">
+  <h1>Supports de « {{ film.titre }} »</h1>
+  <p class="discret">{{ film.supports | length }} support{{ 's' if film.supports | length > 1 }}</p>
+</div>
+
+<section class="bloc">
+  <h2>Supports existants</h2>
+  {% if film.supports %}
+  {# Chaque ligne est un formulaire de modification : les champs sont rattachés
+     au formulaire « modifier-N » par l'attribut form, ce qui garde les colonnes. #}
+  <table class="tableau tableau--formulaire">
+    <thead>
+      <tr><th>N°</th><th>Type</th><th>Format</th><th>Lien (numérique)</th><th>Disponible</th><th>État</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for support in film.supports %}
+      {% set emprunt = en_cours.get(support.id) %}
+      {% set formulaire = 'modifier-' ~ support.id %}
+      <tr>
+        <td>{{ support.id }}</td>
+        <td>
+          <select name="type" form="{{ formulaire }}" aria-label="Type" {% if emprunt %}disabled{% endif %}>
+            {% for type_ in ('physique', 'numérique') %}
+              <option value="{{ type_ }}" {% if support.type == type_ %}selected{% endif %}>{{ type_ | capitalize }}</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td><input name="format" form="{{ formulaire }}" value="{{ support.format }}" aria-label="Format" required size="9"></td>
+        <td><input name="lien" form="{{ formulaire }}" value="{{ support.lien or '' }}" aria-label="Lien" placeholder="URL ou chemin"></td>
+        <td class="centre">
+          <input type="checkbox" name="disponible" value="1" form="{{ formulaire }}" aria-label="Disponible"
+                 title="Décocher pour un exemplaire perdu ou abîmé"
+                 {% if support.disponible %}checked{% endif %}
+                 {% if emprunt or support.type == 'numérique' %}disabled{% endif %}>
+        </td>
+        <td>
+          {% if emprunt %}
+            <span class="badge badge--erreur">Emprunté</span>
+            <div class="discret petit">par {{ emprunt.nom_utilisateur }}, retour le {{ emprunt.date_retour_prevue | date_fr }}</div>
+          {% elif support.type == 'numérique' %}<span class="badge badge--info">En ligne</span>
+          {% elif support.disponible %}<span class="badge badge--succes">Disponible</span>
+          {% else %}<span class="badge badge--erreur">Indisponible</span>{% endif %}
+        </td>
+        <td class="droite">
+          <div class="actions-ligne">
+            <form id="{{ formulaire }}" method="post">
+              {{ champ_csrf() }}
+              <input type="hidden" name="action" value="modifier">
+              <input type="hidden" name="support_id" value="{{ support.id }}">
+              <input type="hidden" name="emprunte" value="{{ '1' if emprunt else '0' }}">
+              <input type="hidden" name="etait_physique" value="{{ '1' if support.type == 'physique' else '0' }}">
+              {% if emprunt %}<input type="hidden" name="type" value="{{ support.type }}">{% endif %}
+              <button class="bouton bouton--petit bouton--secondaire" type="submit">Modifier</button>
+            </form>
+            <form method="post" onsubmit="return confirm('Supprimer ce support ?');">
+              {{ champ_csrf() }}
+              <input type="hidden" name="action" value="supprimer">
+              <input type="hidden" name="support_id" value="{{ support.id }}">
+              <button class="bouton bouton--petit bouton--danger" type="submit"
+                      {% if emprunt %}disabled title="Support emprunté"{% endif %}>Supprimer</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="aide">Un support emprunté ne peut ni changer de type ni être supprimé ; il redevient disponible à son retour.
+    Décocher « Disponible » retire du prêt un exemplaire perdu ou abîmé.</p>
+  {% else %}
+  <p class="vide">Aucun support pour ce film.</p>
+  {% endif %}
+</section>
+
+<section class="bloc">
+  <h2>Ajouter un support</h2>
+  <form class="formulaire-ligne" method="post">
+    {{ champ_csrf() }}
+    <input type="hidden" name="action" value="ajouter">
+    <label>Type
+      <select name="type">
+        <option value="physique">Physique</option>
+        <option value="numérique">Numérique</option>
+      </select>
+    </label>
+    <label>Format
+      <input name="format" list="formats" placeholder="DVD, Blu-ray, MP4…" required size="14">
+      <datalist id="formats"><option value="DVD"><option value="Blu-ray"><option value="4K Ultra HD"><option value="MP4"><option value="MKV"></datalist>
+    </label>
+    <label>Lien <span class="discret">(numérique)</span>
+      <input name="lien" placeholder="https://… ou /chemin/du/fichier" size="32">
+    </label>
+    <button class="bouton" type="submit">Ajouter</button>
+  </form>
+</section>
+{% endblock %}

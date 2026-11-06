@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block titre %}Utilisateurs{% endblock %}
+{% block contenu %}
+<div class="titre-page">
+  <h1>Utilisateurs</h1>
+  <p class="discret">{{ utilisateurs | length }} compte{{ 's' if utilisateurs | length > 1 }} ·
+    {{ utilisateurs | selectattr('bloque') | list | length }} bloqué(s)</p>
+</div>
+
+<section class="bloc">
+  <table class="tableau">
+    <thead><tr><th>Utilisateur</th><th>Nom</th><th>E-mail</th><th>Rôle</th><th>Statut</th><th></th></tr></thead>
+    <tbody>
+      {% for utilisateur in utilisateurs %}
+      <tr {% if utilisateur.bloque %}class="ligne--bloquee"{% endif %}>
+        <td><strong>{{ utilisateur.nom_utilisateur }}</strong></td>
+        <td>{{ utilisateur.prenom }} {{ utilisateur.nom }}</td>
+        <td>{{ utilisateur.email }}</td>
+        <td><span class="badge {{ 'badge--admin' if utilisateur.role == 'administrateur' else 'badge--info' }}">{{ utilisateur.role | capitalize }}</span></td>
+        <td>{% if utilisateur.bloque %}<span class="badge badge--erreur">Bloqué</span>{% else %}<span class="badge badge--succes">Actif</span>{% endif %}</td>
+        <td class="droite">
+          {% if utilisateur.id == session.utilisateur_id %}
+            <span class="discret">vous</span>
+          {% else %}
+            <form method="post" action="{{ url_for('bloquer_utilisateur', utilisateur_id=utilisateur.id) }}">
+              {{ champ_csrf() }}
+              <input type="hidden" name="bloque" value="{{ '0' if utilisateur.bloque else '1' }}">
+              <button class="bouton bouton--petit {{ 'bouton--secondaire' if utilisateur.bloque else 'bouton--danger' }}" type="submit">
+                {{ 'Débloquer' if utilisateur.bloque else 'Bloquer' }}
+              </button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="aide">Un compte bloqué ne peut plus se connecter ; s'il est connecté, sa session est fermée à sa prochaine action.</p>
+</section>
+{% endblock %}

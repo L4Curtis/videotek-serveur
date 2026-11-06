@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% from "_macros.html" import affiche, etoiles, note_texte %}
+{% block titre %}Catalogue{% endblock %}
+{% block contenu %}
+<div class="titre-page">
+  <h1>Catalogue</h1>
+  <p class="discret">{{ films | length }} film{{ 's' if films | length > 1 }}</p>
+</div>
+
+<form class="filtres" method="get" action="{{ url_for('catalogue') }}" role="search">
+  <input class="filtres__recherche" type="search" name="q" value="{{ filtres.q }}"
+         placeholder="Titre ou acteur…" aria-label="Rechercher par titre ou acteur">
+  <input type="number" name="annee" value="{{ filtres.annee }}" placeholder="Année"
+         min="1888" max="2100" aria-label="Année de sortie">
+  <select name="categorie" aria-label="Genre">
+    <option value="">Tous les genres</option>
+    {% for categorie in categories %}
+      <option value="{{ categorie.id }}" {% if filtres.categorie == categorie.id | string %}selected{% endif %}>{{ categorie.nom }}</option>
+    {% endfor %}
+  </select>
+  <select name="tri" aria-label="Ordre de tri">
+    {% for valeur, libelle in [('titre', 'Par titre'), ('note', 'Mieux notés'), ('date_ajout', 'Ajouts récents')] %}
+      <option value="{{ valeur }}" {% if (filtres.tri or 'titre') == valeur %}selected{% endif %}>{{ libelle }}</option>
+    {% endfor %}
+  </select>
+  <button class="bouton" type="submit">Rechercher</button>
+  {% if filtres.q or filtres.annee or filtres.categorie or filtres.tri %}
+    <a class="lien-discret" href="{{ url_for('catalogue') }}">Réinitialiser</a>
+  {% endif %}
+</form>
+
+{% if films %}
+<ul class="grille-films">
+  {% for film in films %}
+  <li>
+    <a class="carte-film" href="{{ url_for('fiche_film', film_id=film.id) }}">
+      {{ affiche(film) }}
+      <div class="carte-film__corps">
+        <h2 class="carte-film__titre">{{ film.titre }}</h2>
+        <p class="carte-film__meta">{{ film.annee or '—' }}{% if film.genres %} · {{ film.genres | join(', ') }}{% endif %}</p>
+        <p class="carte-film__note">
+          {{ etoiles(film.note_moyenne) }}
+          {% if film.nb_avis %}<span class="discret">{{ note_texte(film.note_moyenne) }} ({{ film.nb_avis }})</span>{% endif %}
+        </p>
+      </div>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="vide">Aucun film ne correspond à votre recherche.</p>
+{% endif %}
+{% endblock %}

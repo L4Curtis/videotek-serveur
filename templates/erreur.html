@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block titre %}{{ titre }}{% endblock %}
+{% block contenu %}
+<section class="carte carte--etroite centre">
+  <h1>{{ titre }}</h1>
+  <p>{{ message }}</p>
+  <p><a class="bouton" href="{{ url_for('catalogue') }}">Retour au catalogue</a></p>
+</section>
+{% endblock %}

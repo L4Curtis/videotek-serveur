@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block titre %}Catégories{% endblock %}
+{% block contenu %}
+<div class="titre-page">
+  <h1>Catégories</h1>
+  <p class="discret">{{ categories | length }} genre{{ 's' if categories | length > 1 }}</p>
+</div>
+
+<section class="bloc">
+  <h2>Ajouter une catégorie</h2>
+  <form class="formulaire-ligne" method="post">
+    {{ champ_csrf() }}
+    <input type="hidden" name="action" value="ajouter">
+    <input name="nom" placeholder="Nom du genre" aria-label="Nom de la catégorie" maxlength="50" required>
+    <button class="bouton" type="submit">Ajouter</button>
+  </form>
+</section>
+
+<section class="bloc">
+  <h2>Catégories existantes</h2>
+  {% if categories %}
+  <table class="tableau">
+    <thead><tr><th>Nom</th><th>Films</th><th></th></tr></thead>
+    <tbody>
+      {% for categorie in categories %}
+      <tr>
+        <td>
+          <form class="formulaire-ligne" method="post">
+            {{ champ_csrf() }}
+            <input type="hidden" name="action" value="renommer">
+            <input type="hidden" name="categorie_id" value="{{ categorie.id }}">
+            <input name="nom" value="{{ categorie.nom }}" aria-label="Nouveau nom" maxlength="50" required>
+            <button class="bouton bouton--petit bouton--secondaire" type="submit">Renommer</button>
+          </form>
+        </td>
+        <td>
+          <a href="{{ url_for('catalogue', categorie=categorie.id) }}">{{ nb_films.get(categorie.id, 0) }} film{{ 's' if nb_films.get(categorie.id, 0) > 1 }}</a>
+        </td>
+        <td class="droite">
+          <form method="post" onsubmit="return confirm('Supprimer cette catégorie ? Elle sera retirée des films.');">
+            {{ champ_csrf() }}
+            <input type="hidden" name="action" value="supprimer">
+            <input type="hidden" name="categorie_id" value="{{ categorie.id }}">
+            <button class="bouton bouton--petit bouton--danger" type="submit">Supprimer</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="vide">Aucune catégorie.</p>
+  {% endif %}
+</section>
+{% endblock %}

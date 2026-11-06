@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% from "_macros.html" import affiche %}
+{% block titre %}Mon compte{% endblock %}
+{% block contenu %}
+<div class="titre-page"><h1>Mon compte</h1></div>
+
+<section class="bloc profil">
+  <div>
+    <p class="profil__nom">{{ utilisateur.prenom }} {{ utilisateur.nom }}</p>
+    <p class="discret">@{{ utilisateur.nom_utilisateur }} · {{ utilisateur.email }} · né(e) en {{ utilisateur.annee_naissance }}</p>
+  </div>
+  <span class="badge {{ 'badge--admin' if utilisateur.role == 'administrateur' else 'badge--info' }}">{{ utilisateur.role | capitalize }}</span>
+</section>
+
+<section class="bloc">
+  <h2>Emprunts en cours</h2>
+  {% if en_cours %}
+  <table class="tableau">
+    <thead><tr><th>Film</th><th>Support</th><th>Emprunté le</th><th>Retour prévu</th><th></th></tr></thead>
+    <tbody>
+      {% for emprunt in en_cours %}
+      <tr>
+        <td>{% if emprunt.film_id %}<a href="{{ url_for('fiche_film', film_id=emprunt.film_id) }}">{{ emprunt.titre }}</a>{% else %}—{% endif %}</td>
+        <td>{{ emprunt.format or '—' }}</td>
+        <td>{{ emprunt.date_emprunt | date_fr }}</td>
+        <td>
+          {{ emprunt.date_retour_prevue | date_fr }}
+          {% if emprunt.date_retour_prevue < aujourdhui %}<span class="badge badge--erreur">En retard</span>{% endif %}
+        </td>
+        <td class="droite">
+          <form method="post" action="{{ url_for('rendre', emprunt_id=emprunt.id) }}">
+            {{ champ_csrf() }}
+            <button class="bouton bouton--petit" type="submit">Rendre</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="vide">Aucun emprunt en cours.</p>
+  {% endif %}
+</section>
+
+{% if rendus %}
+<section class="bloc">
+  <h2>Historique des emprunts</h2>
+  <table class="tableau tableau--discret">
+    <thead><tr><th>Film</th><th>Support</th><th>Emprunté le</th><th>Rendu le</th></tr></thead>
+    <tbody>
+      {% for emprunt in rendus %}
+      <tr>
+        <td>{{ emprunt.titre or '—' }}</td>
+        <td>{{ emprunt.format or '—' }}</td>
+        <td>{{ emprunt.date_emprunt | date_fr }}</td>
+        <td>{{ emprunt.date_retour_effective | date_fr }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+<div class="deux-colonnes">
+  {% for titre, liste, route, vide in [("Liste d'envies", envies, 'envies', "Votre liste d'envies est vide."),
+                                       ("Films vus", vus, 'vus', "Aucun film marqué comme vu.")] %}
+  <section class="bloc">
+    <h2>{{ titre }} <span class="discret">({{ liste | length }})</span></h2>
+    {% if liste %}
+    <ul class="liste-films">
+      {% for film in liste %}
+      <li>
+        {{ affiche(film, 'mini') }}
+        <a href="{{ url_for('fiche_film', film_id=film.id) }}">{{ film.titre }}</a>
+        <span class="discret">{{ film.annee or '' }}</span>
+        <form method="post" action="{{ url_for(route, film_id=film.id) }}">
+          {{ champ_csrf() }}
+          <input type="hidden" name="action" value="retirer">
+          <input type="hidden" name="suivant" value="{{ url_for('compte') }}">
+          <button class="bouton bouton--lien" type="submit" title="Retirer de la liste">Retirer</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="vide">{{ vide }}</p>
+    {% endif %}
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}

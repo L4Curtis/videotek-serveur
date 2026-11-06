@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block titre %}Inscription{% endblock %}
+{% block contenu %}
+<section class="carte carte--etroite">
+  <h1>Créer un compte</h1>
+  <form class="formulaire" method="post">
+    {{ champ_csrf() }}
+    <label>Nom d'utilisateur
+      <input name="nom_utilisateur" value="{{ valeurs.get('nom_utilisateur', '') }}" autocomplete="username"
+             pattern="[A-Za-z0-9._\-]{3,30}" title="3 à 30 caractères : lettres sans accent, chiffres, . _ -" required>
+    </label>
+    <div class="formulaire__ligne">
+      <label>Prénom
+        <input name="prenom" value="{{ valeurs.get('prenom', '') }}" autocomplete="given-name" required>
+      </label>
+      <label>Nom
+        <input name="nom" value="{{ valeurs.get('nom', '') }}" autocomplete="family-name" required>
+      </label>
+    </div>
+    <label>E-mail
+      <input name="email" type="email" value="{{ valeurs.get('email', '') }}" autocomplete="email" required>
+    </label>
+    <label>Année de naissance
+      <input name="annee_naissance" type="number" min="1900" max="{{ aujourdhui[:4] }}"
+             value="{{ valeurs.get('annee_naissance', '') }}" required>
+    </label>
+    <div class="formulaire__ligne">
+      <label>Mot de passe
+        <input name="mot_de_passe" type="password" minlength="8" autocomplete="new-password" required>
+      </label>
+      <label>Confirmation
+        <input name="confirmation" type="password" minlength="8" autocomplete="new-password" required>
+      </label>
+    </div>
+    <p class="aide">8 caractères minimum.</p>
+    <button class="bouton bouton--large" type="submit">Créer mon compte</button>
+  </form>
+  <p class="discret centre">Déjà inscrit ? <a href="{{ url_for('connexion') }}">Se connecter</a></p>
+</section>
+{% endblock %}

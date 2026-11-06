@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titre %}Connexion{% endblock %}
+{% block contenu %}
+<section class="carte carte--etroite">
+  <h1>Connexion</h1>
+  <form class="formulaire" method="post">
+    {{ champ_csrf() }}
+    <label>Nom d'utilisateur
+      <input name="nom_utilisateur" value="{{ nom_utilisateur }}" autocomplete="username" required autofocus>
+    </label>
+    <label>Mot de passe
+      <input name="mot_de_passe" type="password" autocomplete="current-password" required>
+    </label>
+    <button class="bouton bouton--large" type="submit">Se connecter</button>
+  </form>
+  <p class="discret centre">Pas encore de compte ? <a href="{{ url_for('inscription') }}">Créer un compte</a></p>
+</section>
+{% endblock %}
