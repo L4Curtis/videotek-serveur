@@ -1,0 +1,9 @@
+# Configuration locale (clé secrète)
+.env
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/

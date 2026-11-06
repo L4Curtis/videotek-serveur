@@ -1,0 +1,58 @@
+# Création coordonnée des deux conteneurs de la vidéothèque.
+#
+# Les deux repos doivent être clonés côte à côte :
+#   videothek/
+#   ├── videotek-api/       (tiers données : API REST + fichier JSON)
+#   └── videotek-serveur/   (tiers présentation) ← lancer docker compose ici
+#
+#   cp ../videotek-api/.env.example ../videotek-api/.env
+#   cp .env.example .env
+#   docker compose up -d --build
+#
+# Site : http://<VM>:5000   ·   API (tests uniquement) : http://<VM>:5001/api
+name: videotek
+
+services:
+  api:                        # tiers données
+    build: ../videotek-api
+    image: videotek-flask:1.0
+    env_file: ../videotek-api/.env    # VIDEOTHEQUE_FICHIER, TMDB_CLE
+    ports:
+      - "5001:5000"           # publié pour les tests (curl, Postman, script)
+    volumes:
+      - ../videotek-api:/app  # code de l'API, partagé avec l'hôte
+      - donnees:/donnees      # fichier JSON de production
+    networks:
+      - videotheque_net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/api')"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  serveur:                    # tiers présentation
+    build: .
+    image: videotek-flask:1.0
+    env_file: .env            # CLE_SECRETE
+    environment:
+      API_URL: http://api:5000/api    # nom « api » résolu par le DNS de Docker
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app                # code du serveur web, partagé avec l'hôte
+    networks:
+      - videotheque_net
+    depends_on:
+      api:
+        condition: service_healthy    # le serveur démarre après l'API
+    restart: unless-stopped
+
+networks:
+  videotheque_net:
+    name: videotheque_net
+    driver: bridge
+
+volumes:
+  donnees:
+    name: videotek_donnees
