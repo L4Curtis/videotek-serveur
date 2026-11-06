@@ -27,7 +27,7 @@ flowchart LR
 
 | Élément | Rôle | Détails |
 |---|---|---|
-| Image `videotek-flask:1.0` | Image commune aux deux conteneurs | `python:3.12-slim` + Flask, requests, bcrypt ; utilisateur non root ; code monté en volume (`Dockerfile` identique dans les deux repos) |
+| Image `videotek-flask:1.0` | Image commune aux deux conteneurs | `python:3.12-slim` + Flask, requests, bcrypt ; utilisateur non root ; code monté en volume. `Dockerfile` identique dans les deux repos ; le compose global la construit **une seule fois** (service `serveur`) et le conteneur `api` la réutilise |
 | Conteneur `serveur` | Pages HTML, formulaires, session, rôle | port 5000 publié (`5000:5000`), démarre quand l'API est prête (`depends_on` + healthcheck) |
 | Conteneur `api` | API REST, règles métier, fichier JSON, TMDB | port 5001 publié pour les tests (`5001:5000`), clé TMDB en variable d'environnement |
 | Réseau `videotheque_net` | Réseau bridge interne | le serveur joint l'API par son nom : `http://api:5000` (DNS de Docker) |

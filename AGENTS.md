@@ -91,6 +91,10 @@ docker compose down                                   # arrêt (le volume de don
   besoin de reconstruire l'image après une modification du code.
 - Une nouvelle dépendance Python doit être ajoutée au `Dockerfile` **des deux
   repos** (image commune), puis `docker compose up -d --build`.
+- L'image commune n'est construite qu'une fois : seul le service `serveur` a un
+  `build`, le service `api` utilise `image: videotek-flask:1.0` avec
+  `pull_policy: never`. Ne pas remettre de `build` sur les deux services : deux
+  constructions simultanées de la même étiquette échouent (« already exists »).
 - Ports : 5000 (site) et 5001 (API, tests uniquement). Le serveur joint l'API
   par `http://api:5000/api` sur le réseau `videotheque_net`.
 - Ne jamais activer le mode debug de Flask (débogueur exposé sur le réseau).

@@ -14,8 +14,8 @@ name: videotek
 
 services:
   api:                        # tiers données
-    build: ../videotek-api
-    image: videotek-flask:1.0
+    image: videotek-flask:1.0 # image commune, construite une seule fois par le service serveur
+    pull_policy: never        # elle n'existe pas sur Docker Hub : jamais téléchargée
     env_file: ../videotek-api/.env    # VIDEOTHEQUE_FICHIER, TMDB_CLE
     ports:
       - "5001:5000"           # publié pour les tests (curl, Postman, script)
@@ -32,7 +32,7 @@ services:
     restart: unless-stopped
 
   serveur:                    # tiers présentation
-    build: .
+    build: .                  # construit l'image commune (Dockerfile de ce repo)
     image: videotek-flask:1.0
     env_file: .env            # CLE_SECRETE
     environment:
