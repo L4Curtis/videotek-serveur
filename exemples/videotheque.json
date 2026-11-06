@@ -1,0 +1,183 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "nom": "Action"
+    },
+    {
+      "id": 2,
+      "nom": "Aventure"
+    },
+    {
+      "id": 3,
+      "nom": "Animation"
+    },
+    {
+      "id": 4,
+      "nom": "Comédie"
+    },
+    {
+      "id": 5,
+      "nom": "Crime"
+    },
+    {
+      "id": 6,
+      "nom": "Drame"
+    },
+    {
+      "id": 7,
+      "nom": "Familial"
+    },
+    {
+      "id": 8,
+      "nom": "Fantastique"
+    },
+    {
+      "id": 9,
+      "nom": "Romance"
+    },
+    {
+      "id": 10,
+      "nom": "Science-Fiction"
+    },
+    {
+      "id": 11,
+      "nom": "Thriller"
+    }
+  ],
+  "films": [
+    {
+      "id": 1,
+      "titre": "Inception",
+      "categories": [
+        1,
+        10,
+        2
+      ],
+      "annee": 2010,
+      "acteurs": [
+        "Leonardo DiCaprio",
+        "Joseph Gordon-Levitt",
+        "Elliot Page",
+        "Tom Hardy",
+        "Marion Cotillard"
+      ],
+      "description": "Un spécialiste du vol de secrets dans les rêves se voit confier la mission inverse : implanter une idée dans l'esprit d'un héritier."
+    },
+    {
+      "id": 2,
+      "titre": "Matrix",
+      "categories": [
+        1,
+        10
+      ],
+      "annee": 1999,
+      "acteurs": [
+        "Keanu Reeves",
+        "Laurence Fishburne",
+        "Carrie-Anne Moss",
+        "Hugo Weaving"
+      ],
+      "description": "Un programmeur découvre que le monde qu'il connaît est une simulation et rejoint une poignée de rebelles."
+    },
+    {
+      "id": 3,
+      "titre": "Interstellar",
+      "categories": [
+        2,
+        6,
+        10
+      ],
+      "annee": 2014,
+      "acteurs": [
+        "Matthew McConaughey",
+        "Anne Hathaway",
+        "Jessica Chastain",
+        "Michael Caine"
+      ],
+      "description": "Alors que la Terre se meurt, un ancien pilote part à travers un trou de ver chercher une planète habitable."
+    },
+    {
+      "id": 4,
+      "titre": "Le Fabuleux Destin d'Amélie Poulain",
+      "categories": [
+        4,
+        9
+      ],
+      "annee": 2001,
+      "acteurs": [
+        "Audrey Tautou",
+        "Mathieu Kassovitz",
+        "Rufus",
+        "Yolande Moreau"
+      ],
+      "description": "Une jeune serveuse de Montmartre décide de faire le bonheur des gens qui l'entourent, en oubliant un peu le sien."
+    },
+    {
+      "id": 5,
+      "titre": "Intouchables",
+      "categories": [
+        4,
+        6
+      ],
+      "annee": 2011,
+      "acteurs": [
+        "François Cluzet",
+        "Omar Sy",
+        "Anne Le Ny",
+        "Audrey Fleurot"
+      ],
+      "description": "Un aristocrate tétraplégique engage comme aide à domicile un jeune de banlieue que rien ne prédestinait à ce travail."
+    },
+    {
+      "id": 6,
+      "titre": "Le Voyage de Chihiro",
+      "categories": [
+        3,
+        7,
+        8
+      ],
+      "annee": 2001,
+      "acteurs": [
+        "Rumi Hiiragi",
+        "Miyu Irino",
+        "Mari Natsuki"
+      ],
+      "description": "Égarée dans un monde peuplé d'esprits, une fillette doit travailler dans un établissement de bains pour sauver ses parents."
+    },
+    {
+      "id": 7,
+      "titre": "Parasite",
+      "categories": [
+        4,
+        11,
+        6
+      ],
+      "annee": 2019,
+      "acteurs": [
+        "Song Kang-ho",
+        "Lee Sun-kyun",
+        "Cho Yeo-jeong",
+        "Choi Woo-shik"
+      ],
+      "description": "Une famille sans le sou s'infiltre, un membre après l'autre, au service d'une riche famille de Séoul."
+    },
+    {
+      "id": 8,
+      "titre": "Retour vers le futur",
+      "categories": [
+        2,
+        4,
+        10
+      ],
+      "annee": 1985,
+      "acteurs": [
+        "Michael J. Fox",
+        "Christopher Lloyd",
+        "Lea Thompson",
+        "Crispin Glover"
+      ],
+      "description": "Propulsé en 1955 à bord d'une voiture transformée en machine à voyager dans le temps, un lycéen doit réunir ses futurs parents."
+    }
+  ]
+}

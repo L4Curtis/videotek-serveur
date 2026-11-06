@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block titre %}Tests du conteneur{% endblock %}
+{% block contenu %}
+<div class="titre-page">
+  <h1>Tests du conteneur Flask</h1>
+  <p class="discret">Pages demandées par le sujet pour valider l'image Docker, sans passer par l'API.</p>
+</div>
+<ul class="liste-tests">
+  <li><a href="{{ url_for('test.page_simple') }}">Page HTML simple</a>
+    <span class="discret">— HTML statique servi par Flask</span></li>
+  <li><a href="{{ url_for('test.formulaire') }}">Formulaire et page de traitement</a>
+    <span class="discret">— traitement en Python, résultat affiché avec Jinja</span></li>
+  <li><a href="{{ url_for('test.videotheque') }}">Template Jinja sur un fichier JSON</a>
+    <span class="discret">— exemples/videotheque.json</span></li>
+</ul>
+{% endblock %}

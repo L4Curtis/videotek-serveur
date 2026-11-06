@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titre %}Test : résultat du formulaire{% endblock %}
+{% block contenu %}
+<p class="fil"><a href="{{ url_for('test.formulaire') }}">← Retour au formulaire</a></p>
+<section class="carte carte--etroite">
+  {% if erreurs %}
+    <h1>Formulaire incomplet</h1>
+    <ul class="erreurs">
+      {% for erreur in erreurs %}<li>{{ erreur }}</li>{% endfor %}
+    </ul>
+  {% else %}
+    <h1>Merci {{ prenom | title }} !</h1>
+    <p>Vous avez donné la note de <strong>{{ note }}/5</strong> à « {{ film }} ».</p>
+    <p class="etoiles etoiles--grandes">{{ '★' * note }}{{ '☆' * (5 - note) }}</p>
+    {% if note >= 4 %}
+      <p>Un vrai coup de cœur.</p>
+    {% elif note >= 2 %}
+      <p>Un avis mitigé.</p>
+    {% else %}
+      <p>Une déception.</p>
+    {% endif %}
+    {% if genres %}
+      <p>Genres aimés ({{ genres | length }}) : {{ genres | join(', ') }}.</p>
+    {% else %}
+      <p class="discret">Aucun genre coché.</p>
+    {% endif %}
+  {% endif %}
+</section>
+{% endblock %}

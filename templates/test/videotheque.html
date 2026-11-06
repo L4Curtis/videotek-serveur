@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titre %}Test : template Jinja et JSON{% endblock %}
+{% block contenu %}
+<p class="fil"><a href="{{ url_for('test.accueil') }}">← Tests du conteneur</a></p>
+<div class="titre-page">
+  <h1>Vidéothèque d'exemple</h1>
+  <p class="discret">{{ films | length }} film{{ 's' if films | length > 1 }} sur {{ total }}, lus dans exemples/videotheque.json</p>
+</div>
+
+<p class="etiquettes">
+  <a class="etiquette {{ 'etiquette--active' if genre is none }}" href="{{ url_for('test.videotheque') }}">Tous</a>
+  {% for categorie in categories | sort(attribute='nom') %}
+    <a class="etiquette {{ 'etiquette--active' if genre == categorie.id }}" href="{{ url_for('test.videotheque', genre=categorie.id) }}">{{ categorie.nom }}</a>
+  {% endfor %}
+</p>
+
+<table class="tableau">
+  <thead><tr><th>#</th><th>Titre</th><th>Année</th><th>Genres</th><th>Acteurs</th></tr></thead>
+  <tbody>
+    {% for film in films %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td><strong>{{ film.titre }}</strong><br><span class="discret">{{ film.description | truncate(70) }}</span></td>
+      <td>{{ film.annee }}</td>
+      <td>{% for id in film.categories %}{{ noms[id] }}{{ ', ' if not loop.last }}{% endfor %}</td>
+      <td>{{ film.acteurs[:2] | join(', ') }}{% if film.acteurs | length > 2 %} <span class="discret">+{{ film.acteurs | length - 2 }}</span>{% endif %}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="vide">Aucun film dans ce genre.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

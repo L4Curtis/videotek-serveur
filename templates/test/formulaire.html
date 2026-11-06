@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titre %}Test : formulaire{% endblock %}
+{% block contenu %}
+<p class="fil"><a href="{{ url_for('test.accueil') }}">← Tests du conteneur</a></p>
+<section class="carte carte--etroite">
+  <h1>Votre film préféré</h1>
+  <p class="discret">Le formulaire est envoyé en POST, traité en Python puis le résultat est affiché par un template Jinja.</p>
+  <form class="formulaire" method="post" action="{{ url_for('test.formulaire') }}">
+    {{ champ_csrf() }}
+    <label>Prénom <input name="prenom"></label>
+    <label>Titre du film <input name="film"></label>
+    <label>Note
+      <select name="note">
+        <option value="">— choisir —</option>
+        {% for n in range(1, 6) %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
+      </select>
+    </label>
+    <fieldset class="cases">
+      <legend>Genres aimés</legend>
+      {% for genre in genres %}
+        <label class="case"><input type="checkbox" name="genres" value="{{ genre }}"> {{ genre }}</label>
+      {% endfor %}
+    </fieldset>
+    <button class="bouton" type="submit">Envoyer</button>
+  </form>
+</section>
+{% endblock %}
