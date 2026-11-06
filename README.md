@@ -15,16 +15,12 @@ les deux conteneurs (`api` et `serveur`).
 ```mermaid
 flowchart LR
     nav["Navigateur<br/>(tiers client)"] -->|"HTTP :5000<br/>GET / POST, cookie de session"| srv
-    subgraph vm["VM RemoteLabz 10.11.16.145 : hôte Docker"]
-        subgraph net["réseau Docker videotheque_net (bridge)"]
-            srv["Conteneur serveur<br/>Flask + Jinja<br/>(ce repo)"]
-            api["Conteneur api<br/>API REST Flask<br/>(videotek-api)"]
-        end
-        code1[/"volume : videotek-serveur/ → /app"/] -.- srv
-        code2[/"volume : videotek-api/ → /app"/] -.- api
+    subgraph vm["VM RemoteLabz (hôte Docker)"]
+        srv["Conteneur serveur<br/>Flask + Jinja<br/>(ce repo)"]
+        api["Conteneur api<br/>API REST Flask<br/>(videotek-api)"]
         json[("volume videotek_donnees<br/>videotheque.json")]
     end
-    srv -->|"HTTP REST + JSON<br/>http://api:5000/api<br/>en-tête X-Utilisateur-Id"| api
+    srv -->|"HTTP REST + JSON<br/>api:5000/api<br/>en-tête X-Utilisateur-Id"| api
     api -->|"lecture / écriture"| json
     api -->|"HTTPS :443"| tmdb["API TMDB"]
 ```
@@ -44,40 +40,34 @@ traitent un formulaire ou un bouton, appellent l'API puis redirigent avec un
 message de confirmation ou d'erreur (flash).
 
 ```mermaid
-flowchart TB
-    subgraph visiteur["Visiteur"]
-        cx["/connexion"]
-        ins["/inscription"]
+flowchart LR
+    subgraph V["Visiteur"]
+        direction TB
+        ins["/inscription"] --> cx["/connexion"]
     end
-    subgraph utilisateur["Utilisateur connecté"]
-        cat["/ catalogue<br/>recherche, filtres, tri"]
-        fiche["/films/#lt;id#gt;<br/>fiche du film"]
-        compte["/compte<br/>emprunts, envies, vus"]
-        avis(["POST /films/#lt;id#gt;/avis"])
-        emp(["POST /emprunter/#lt;support_id#gt;"])
-        env(["POST /envies/#lt;film_id#gt;<br/>POST /vus/#lt;film_id#gt;"])
-        ret(["POST /emprunts/#lt;id#gt;/retour"])
-        deco(["GET /deconnexion"])
+    subgraph U["Utilisateur connecté"]
+        direction TB
+        cat["/ catalogue<br/>recherche, filtres, tri"] --> fiche["/films/#lt;id#gt;<br/>fiche du film"]
+        fiche --> sf(["scripts POST : avis, emprunter,<br/>liste d'envies, vu"])
+        compte["/compte<br/>emprunts, envies, vus"] --> ret(["POST /emprunts/#lt;id#gt;/retour"])
     end
-    subgraph admin["Administrateur"]
+    subgraph A["Administrateur"]
+        direction TB
         af["/admin/films/ajouter<br/>/admin/films/#lt;id#gt;/modifier"]
         sup["/admin/films/#lt;id#gt;/supports"]
-        del(["POST /admin/films/#lt;id#gt;/supprimer"])
-        cats["/admin/categories"]
         imp["/admin/import"]
+        cats["/admin/categories"]
         users["/admin/utilisateurs"]
-        bl(["POST /admin/utilisateurs/#lt;id#gt;/bloquer"])
     end
-    ins --> cx --> cat --> fiche
-    fiche --> avis & emp & env
-    avis & emp --> fiche
-    compte --> ret --> compte
-    fiche -->|admin| af & sup & del
+    cx -->|session créée| cat
+    fiche -->|admin| af
+    fiche -->|admin| sup
     imp -->|import| fiche
-    imp -.->|"TMDB indisponible"| af
-    users --> bl --> users
-    deco --> cx
+    imp -.->|TMDB indisponible| af
 ```
+
+Chaque script redirige vers une page (fiche, Mon compte, page d'administration)
+avec un message ; `GET /deconnexion` vide la session et revient à la connexion.
 
 | Page ou script (route) | Opérations | Appels à l'API |
 |---|---|---|
